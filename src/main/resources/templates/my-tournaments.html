@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tournaments</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f7fc;
+        }
+
+
+        .sidebar {
+            width: 260px;
+            background-color: #16213e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+        .sidebar-header .logo-icon { font-size: 32px; color: #00a8ff; }
+        .sidebar-header h2 { font-size: 22px; font-weight: 600; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li a { display: flex; align-items: center; color: #b0b9c8; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s ease; }
+        .nav-links li a:hover, .nav-links li a.active { background-color: #0f3460; color: #fff; }
+        .nav-links li a .icon { font-size: 22px; margin-right: 15px; }
+        .logout-link a { display: flex; align-items: center; color: #e94560; text-decoration: none; padding: 15px; border-radius: 10px; transition: background-color 0.3s ease; }
+        .logout-link a:hover { background-color: rgba(233, 69, 96, 0.1); }
+
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            color: #1a1a2e;
+            font-size: 36px;
+        }
+        .create-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #00a8ff, #007bff);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .create-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 168, 255, 0.25);
+        }
+
+
+        .table-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        th {
+            color: #777;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        td {
+            color: #333;
+            font-size: 15px;
+        }
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-upcoming { background-color: #e0f7fa; color: #00838f; }
+        .status-ongoing { background-color: #e8f5e9; color: #2e7d32; }
+        .status-completed { background-color: #fbe9e7; color: #d84315; }
+
+        .actions a {
+            color: #555;
+            text-decoration: none;
+            margin-right: 15px;
+            font-size: 20px;
+            transition: color 0.3s ease;
+        }
+        .actions a:hover { color: #007bff; }
+        .actions a.delete:hover { color: #e94560; }
+
+        .no-tournaments {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+
+        /* Custom Modal Styling */
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .modal-title {
+            font-weight: 600;
+        }
+        .modal-body {
+            font-size: 16px;
+            color: #555;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class='bx bxs-trophy logo-icon'></i>
+        <h2>TournaSys</h2>
+    </div>
+    <ul class="nav-links">
+        <li><a th:href="@{/organizer/dashboard}"><i class='bx bxs-dashboard icon'></i><span>Dashboard</span></a></li>
+        <li><a th:href="@{/organizer/tournaments}" class="active"><i class='bx bxs-flag-alt icon'></i><span>My Tournaments</span></a></li>
+        <li><a th:href="@{/profile}"><i class='bx bxs-user-circle icon'></i><span>Profile</span></a></li>
+    </ul>
+    <div class="logout-link">
+        <a th:href="@{/logout}"><i class='bx bx-log-out icon'></i><span>Logout</span></a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>My Tournaments</h1>
+        <a th:href="@{/organizer/tournaments/new}" class="create-btn"><i class='bx bx-plus'></i> Create New Tournament</a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Sport</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tournament : ${tournaments}">
+                <td th:text="${tournament.name}">Tournament Name</td>
+                <td th:text="${tournament.sport}">Sport</td>
+                <td th:text="${#temporals.format(tournament.tournamentDate, 'dd-MMM-yyyy')}">Date</td>
+                <td>
+                            <span th:with="today=${T(java.time.LocalDate).now()}"
+                                  th:text="${tournament.tournamentDate.isAfter(today) ? 'Upcoming' : (tournament.tournamentDate.isBefore(today) ? 'Completed' : 'Ongoing')}"
+                                  th:classappend="${tournament.tournamentDate.isAfter(today) ? 'status-upcoming' : (tournament.tournamentDate.isBefore(today) ? 'status-completed' : 'status-ongoing')}"
+                                  class="status">
+                            </span>
+                </td>
+                <td class="actions">
+                    <a th:href="@{/organizer/tournaments/{id}/registrations(id=${tournament.id})}" th:title="'View Registrations for ' + ${tournament.name}"><i class='bx bxs-group'></i></a>
+                    <a th:href="@{/organizer/tournaments/edit/{id}(id=${tournament.id})}" title="Edit"><i class='bx bxs-edit'></i></a>
+                    <!-- UPDATED DELETE LINK -->
+                    <a href="#" class="delete-link delete" th:data-delete-url="@{/organizer/tournaments/delete/{id}(id=${tournament.id})}" th:data-tournament-name="${tournament.name}" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" title="Delete">
+                        <i class='bx bxs-trash'></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(tournaments)}" class="no-tournaments">
+            <h3>No Tournaments Found</h3>
+            <p>You haven't created any tournaments yet. Click the button above to get started!</p>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the tournament: <br> <strong id="tournamentNameToDelete"></strong>?
+                <p class="text-danger mt-2"><small>This action cannot be undone.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteButton" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteModal = document.getElementById('deleteConfirmationModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            const button = event.relatedTarget;
+
+            // Extract info from data-* attributes
+            const deleteUrl = button.getAttribute('data-delete-url');
+            const tournamentName = button.getAttribute('data-tournament-name');
+
+            // Update the modal's content.
+            const modalBodyName = deleteModal.querySelector('#tournamentNameToDelete');
+            const confirmDeleteButton = deleteModal.querySelector('#confirmDeleteButton');
+
+            modalBodyName.textContent = tournamentName;
+            confirmDeleteButton.setAttribute('href', deleteUrl);
+        });
+    });
+</script>
+</body>
+</html>

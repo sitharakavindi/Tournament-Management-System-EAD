@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f7fc;
+        }
+
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            width: 260px;
+            background-color: #16213e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 1056; /* Ensure sidebar is above modal backdrop */
+        }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+        .sidebar-header .logo-icon { font-size: 32px; color: #00a8ff; }
+        .sidebar-header h2 { font-size: 22px; font-weight: 600; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li a { display: flex; align-items: center; color: #b0b9c8; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s ease; }
+        .nav-links li a:hover, .nav-links li a.active { background-color: #0f3460; color: #fff; }
+        .nav-links li a .icon { font-size: 22px; margin-right: 15px; }
+        .logout-link a { display: flex; align-items: center; color: #e94560; text-decoration: none; padding: 15px; border-radius: 10px; transition: background-color 0.3s ease; }
+        .logout-link a:hover { background-color: rgba(233, 69, 96, 0.1); }
+
+        /* --- Main Content Styles --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .main-header h1 { color: #1a1a2e; font-size: 36px; margin-bottom: 10px; }
+        .main-header p { color: #555; font-size: 18px; margin-bottom: 40px; }
+        .action-button { display: inline-block; background: linear-gradient(135deg, #00a8ff, #007bff); color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; font-size: 16px; transition: all 0.3s ease; }
+        .action-button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 168, 255, 0.25); }
+        .tournament-list h2 { font-size: 24px; color: #1a1a2e; margin-bottom: 20px; }
+        .tournament-card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .tournament-info h3 { font-size: 18px; color: #1a1a2e; margin-bottom: 5px; }
+        .tournament-info .details { display: flex; gap: 20px; margin-top: 5px; color: #777; font-size: 14px; }
+        .tournament-info .details span { display: flex; align-items: center; gap: 5px; }
+        .details-btn { background: #6c757d; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+
+        /* Glassmorphism Modal Style */
+        .modal-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            color: #fff;
+        }
+        .modal-glass .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .modal-glass .modal-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .modal-glass .modal-body {
+            color: #eee;
+        }
+        .modal-glass .detail-item {
+            margin-bottom: 15px;
+        }
+        .modal-glass .detail-item h4 {
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .modal-glass .detail-item p {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .modal-glass .description-section {
+            margin-top: 20px;
+        }
+        .modal-glass .description-section h5 {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class='bx bxs-trophy logo-icon'></i>
+        <h2>TournaSys</h2>
+    </div>
+    <ul class="nav-links">
+        <li><a th:href="@{/player/dashboard}" class="active"><i class='bx bxs-dashboard icon'></i><span>Dashboard</span></a></li>
+        <li><a th:href="@{/profile}"><i class='bx bxs-user-circle icon'></i><span>Profile</span></a></li>
+    </ul>
+    <div class="logout-link">
+        <a th:href="@{/logout}"><i class='bx bx-log-out icon'></i><span>Logout</span></a>
+    </div>
+</div>
+
+<div class="main-content">
+    <header class="main-header">
+        <h1 th:text="'Welcome, ' + ${#authentication.principal.username} + '!'">Welcome, Player!</h1>
+        <p>Ready to compete? Find your next challenge here.</p>
+    </header>
+
+    <main>
+        <a th:href="@{/tournaments/browse}" class="action-button"><i class='bx bx-search-alt' style="margin-right: 5px;"></i> Browse All Tournaments</a>
+
+        <div class="tournament-list" style="margin-top: 40px;">
+            <h2>Your Upcoming Tournaments</h2>
+
+            <div th:each="reg : ${registrations}" class="tournament-card">
+                <div class="tournament-info">
+                    <h3 th:text="${reg.tournament.name}">Tournament Name</h3>
+                    <div class="details">
+                        <span><i class='bx bxs-joystick'></i> <span th:text="${reg.tournament.sport}">Sport</span></span>
+                        <span><i class='bx bxs-calendar'></i> <span th:text="${#temporals.format(reg.tournament.tournamentDate, 'dd-MMM-yyyy')}">Date</span></span>
+                    </div>
+                </div>
+                <!-- UPDATED BUTTON TO TRIGGER MODAL -->
+                <button type="button" class="details-btn" data-bs-toggle="modal" data-bs-target="#tournamentDetailsModal"
+                        th:data-name="${reg.tournament.name}"
+                        th:data-sport="${reg.tournament.sport}"
+                        th:data-date="${#temporals.format(reg.tournament.tournamentDate, 'dd MMMM yyyy')}"
+                        th:data-organizer="${reg.tournament.organizer.username}"
+                        th:data-description="${reg.tournament.description}">
+                    View Details
+                </button>
+            </div>
+
+            <div class="tournament-card" th:if="${#lists.isEmpty(registrations)}">
+                <div class="tournament-info">
+                    <h3>No Upcoming Tournaments</h3>
+                    <p>You haven't registered for any tournaments yet. Browse tournaments to get started!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap Modal with Glassmorphism Effect -->
+<div class="modal fade" id="tournamentDetailsModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-glass">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Tournament Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-item">
+                    <h4>Sport</h4>
+                    <p id="modal-sport"></p>
+                </div>
+                <div class="detail-item">
+                    <h4>Date</h4>
+                    <p id="modal-date"></p>
+                </div>
+                <div class="detail-item">
+                    <h4>Organizer</h4>
+                    <p id="modal-organizer"></p>
+                </div>
+                <div class="description-section">
+                    <h5>Description</h5>
+                    <p id="modal-description"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript for Modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const detailsModal = document.getElementById('tournamentDetailsModal');
+        detailsModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            const button = event.relatedTarget;
+
+            // Extract info from data-* attributes
+            const name = button.getAttribute('data-name');
+            const sport = button.getAttribute('data-sport');
+            const date = button.getAttribute('data-date');
+            const organizer = button.getAttribute('data-organizer');
+            const description = button.getAttribute('data-description');
+
+            // Update the modal's content
+            const modalTitle = detailsModal.querySelector('.modal-title');
+            const modalSport = detailsModal.querySelector('#modal-sport');
+            const modalDate = detailsModal.querySelector('#modal-date');
+            const modalOrganizer = detailsModal.querySelector('#modal-organizer');
+            const modalDescription = detailsModal.querySelector('#modal-description');
+
+            modalTitle.textContent = name;
+            modalSport.textContent = sport;
+            modalDate.textContent = date;
+            modalOrganizer.textContent = organizer;
+            modalDescription.textContent = description;
+        });
+    });
+</script>
+</body>
+</html>

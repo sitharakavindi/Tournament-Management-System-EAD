@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Registration</title>
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px 0; background-color: #1a1a2e; background-image: linear-gradient(315deg, #1a1a2e 0%, #16213e 74%); }
+        .reg-card { position: relative; z-index: 10; width: 100%; max-width: 480px; padding: 40px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); color: #fff; text-align: center; }
+        .reg-card h1 { font-size: 30px; font-weight: 600; margin-bottom: 10px; }
+        .reg-card p { font-size: 16px; margin-bottom: 30px; opacity: 0.8; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-control { width: 100%; padding: 12px 20px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; font-size: 15px; color: #fff; transition: all 0.3s ease; }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .form-control:focus { outline: none; border-color: #00a8ff; box-shadow: 0 0 15px rgba(0, 168, 255, 0.3); }
+        .btn { width: 100%; padding: 14px 20px; border: none; border-radius: 25px; background: linear-gradient(135deg, #00a8ff, #007bff); color: #fff; font-size: 18px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 168, 255, 0.25); }
+        .login-link { margin-top: 25px; font-size: 14px; }
+        .login-link a { color: rgba(255, 255, 255, 0.7); text-decoration: none; font-weight: 500; transition: color 0.3s ease; }
+        .login-link a:hover { color: #00a8ff; }
+        .alert { padding: 12px 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 15px; font-size: 14px; font-weight: 500; opacity: 1; transition: opacity 0.5s ease-out; }
+        .alert-danger { color: #f8d7da; background-color: rgba(220, 53, 69, 0.2); border-color: rgba(220, 53, 69, 0.3); }
+        .alert-success { color: #d1e7dd; background-color: rgba(25, 135, 84, 0.2); border-color: rgba(25, 135, 84, 0.3); }
+    </style>
+</head>
+<body>
+<div class="reg-card">
+    <h1>Join the Competition</h1>
+    <p>Create your player account to participate in tournaments</p>
+
+
+    <div th:if="${param.success}" class="alert alert-success">
+        Registration successful! You can now <a th:href="@{/login}" style="color: #99e0ff; text-decoration: underline;">login</a>.
+    </div>
+
+
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <form th:action="@{/registration/player}" method="post" th:object="${user}" onsubmit="return validatePassword();">
+        <div class="form-group">
+            <input type="text" th:field="*{username}" class="form-control" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+            <input type="text" th:field="*{name}" class="form-control" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+            <input type="email" th:field="*{email}" class="form-control" placeholder="Email Address" required>
+        </div>
+        <div class="form-group">
+            <input type="password" th:field="*{password}" id="password" class="form-control" placeholder="Password" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+        </div>
+
+        <div id="passwordError" class="alert alert-danger" style="display:none;">
+            Passwords do not match. Please try again.
+        </div>
+
+        <button type="submit" class="btn">Create My Player Account</button>
+    </form>
+    <div class="login-link">
+        <p>Already have an account? <a th:href="@{/login}">Login Here</a></p>
+    </div>
+</div>
+<script>
+
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorDiv = document.getElementById('passwordError');
+        if (password !== confirmPassword) {
+            errorDiv.style.display = 'block';
+            return false;
+        }
+        errorDiv.style.display = 'none';
+        return true;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const successAlert = document.querySelector('.alert-success');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.opacity = '0';
+                setTimeout(() => { successAlert.style.display = 'none'; }, 500);
+            }, 5000);
+        }
+        const errorAlert = document.querySelector('.alert-danger');
+        if (errorAlert) {
+            setTimeout(() => {
+                errorAlert.style.opacity = '0';
+                setTimeout(() => { errorAlert.style.display = 'none'; }, 500);
+            }, 5000);
+        }
+    });
+</script>
+</body>
+</html>

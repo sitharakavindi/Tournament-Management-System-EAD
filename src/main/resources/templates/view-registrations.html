@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Registrations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f7fc;
+        }
+
+
+        .sidebar {
+            width: 260px;
+            background-color: #16213e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+        .sidebar-header .logo-icon { font-size: 32px; color: #00a8ff; }
+        .sidebar-header h2 { font-size: 22px; font-weight: 600; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li a { display: flex; align-items: center; color: #b0b9c8; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s ease; }
+        .nav-links li a:hover, .nav-links li a.active { background-color: #0f3460; color: #fff; }
+        .nav-links li a .icon { font-size: 22px; margin-right: 15px; }
+        .logout-link a { display: flex; align-items: center; color: #e94560; text-decoration: none; padding: 15px; border-radius: 10px; transition: background-color 0.3s ease; }
+        .logout-link a:hover { background-color: rgba(233, 69, 96, 0.1); }
+
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        .page-header {
+            margin-bottom: 40px;
+        }
+        .page-header h1 {
+            color: #1a1a2e;
+            font-size: 36px;
+        }
+        .page-header p {
+            color: #777;
+            font-size: 18px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+
+        .table-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+        }
+        th {
+            color: #777;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        td {
+            color: #333;
+            font-size: 15px;
+        }
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .no-registrations {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class='bx bxs-trophy logo-icon'></i>
+        <h2>TournaSys</h2>
+    </div>
+    <ul class="nav-links">
+        <li><a th:href="@{/organizer/dashboard}"><i class='bx bxs-dashboard icon'></i><span>Dashboard</span></a></li>
+        <li><a th:href="@{/organizer/tournaments}" class="active"><i class='bx bxs-flag-alt icon'></i><span>My Tournaments</span></a></li>
+        <li><a th:href="@{/profile}"><i class='bx bxs-user-circle icon'></i><span>Profile</span></a></li>
+    </ul>
+    <div class="logout-link">
+        <a th:href="@{/logout}"><i class='bx bx-log-out icon'></i><span>Logout</span></a>
+    </div>
+</div>
+
+<div class="main-content">
+    <a th:href="@{/organizer/tournaments}" class="back-link"><i class='bx bx-arrow-back'></i> Back to My Tournaments</a>
+    <div class="page-header">
+        <h1>Registrations</h1>
+        <p th:text="'For: ' + ${tournament.name}">For: Tournament Name</p>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Registration Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Loop through each registration -->
+            <tr th:each="reg : ${registrations}">
+                <td>
+                    <div class="player-info">
+                        <div class="player-avatar" th:text="${#strings.substring(reg.player.name, 0, 1)}"></div>
+                        <span th:text="${reg.player.name}">Player Name</span>
+                    </div>
+                </td>
+                <td th:text="${reg.player.username}">username</td>
+                <td th:text="${reg.player.email}">player.email@example.com</td>
+                <td th:text="${#temporals.format(reg.registrationDate, 'dd-MMM-yyyy hh:mm a')}">Registration Date</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(registrations)}" class="no-registrations">
+            <h3>No Registrations Yet</h3>
+            <p>There are currently no players registered for this tournament.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

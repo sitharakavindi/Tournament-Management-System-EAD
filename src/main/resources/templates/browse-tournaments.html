@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Tournaments</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f7fc; }
+        .sidebar { width: 260px; background-color: #16213e; color: #fff; display: flex; flex-direction: column; padding: 20px; }
+        .sidebar-header { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+        .sidebar-header .logo-icon { font-size: 32px; color: #00a8ff; }
+        .sidebar-header h2 { font-size: 22px; font-weight: 600; }
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li a { display: flex; align-items: center; color: #b0b9c8; text-decoration: none; padding: 15px; border-radius: 10px; margin-bottom: 10px; transition: all 0.3s ease; }
+        .nav-links li a:hover, .nav-links li a.active { background-color: #0f3460; color: #fff; }
+        .nav-links li a .icon { font-size: 22px; margin-right: 15px; }
+        .logout-link a { display: flex; align-items: center; color: #e94560; text-decoration: none; padding: 15px; border-radius: 10px; transition: background-color 0.3s ease; }
+        .logout-link a:hover { background-color: rgba(233, 69, 96, 0.1); }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .main-header h1 { color: #1a1a2e; font-size: 36px; margin-bottom: 10px; }
+        .main-header p { color: #555; font-size: 18px; margin-bottom: 40px; }
+        .search-bar { display: flex; margin-bottom: 20px; background: #fff; border-radius: 25px; padding: 5px; box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+        .search-bar input { flex-grow: 1; border: none; outline: none; padding: 10px 20px; font-size: 16px; background: transparent; }
+        .search-bar button { border: none; background: linear-gradient(135deg, #00a8ff, #007bff); color: #fff; padding: 10px 25px; border-radius: 20px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+        .tournament-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .tournament-card { background: #fff; border-radius: 15px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .tournament-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); }
+        .card-header { background-color: #1a1a2e; color: #fff; padding: 15px 20px; }
+        .card-header h3 { font-size: 18px; }
+        .card-body { padding: 20px; flex-grow: 1; }
+        .card-body p { color: #777; font-size: 14px; margin-bottom: 15px; min-height: 40px; }
+        .card-details { display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+        .card-details span { display: flex; align-items: center; gap: 10px; }
+        .card-details .icon { color: #00a8ff; font-size: 18px; }
+        .card-footer { padding: 20px; border-top: 1px solid #f0f0f0; }
+        .register-btn { display: block; width: 100%; text-align: center; background: #4caf50; color: #fff; padding: 12px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: background-color 0.3s ease; }
+        .register-btn:hover { background-color: #45a049; }
+        .no-tournaments { background: #fff; padding: 40px; border-radius: 15px; text-align: center; color: #777; grid-column: 1 / -1; }
+        .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 15px; font-size: 14px; font-weight: 500; }
+        .alert-danger { color: #f8d7da; background-color: rgba(220, 53, 69, 0.2); border-color: rgba(220, 53, 69, 0.3); }
+        .alert-success { color: #d1e7dd; background-color: rgba(25, 135, 84, 0.2); border-color: rgba(25, 135, 84, 0.3); }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-header">
+        <i class='bx bxs-trophy logo-icon'></i>
+        <h2>TournaSys</h2>
+    </div>
+    <ul class="nav-links">
+        <li sec:authorize="hasRole('PLAYER')"><a th:href="@{/player/dashboard}"><i class='bx bxs-dashboard icon'></i><span>Dashboard</span></a></li>
+        <li sec:authorize="hasRole('ORGANIZER')"><a th:href="@{/organizer/dashboard}"><i class='bx bxs-dashboard icon'></i><span>Dashboard</span></a></li>
+        <li><a th:href="@{/profile}"><i class='bx bxs-user-circle icon'></i><span>Profile</span></a></li>
+    </ul>
+    <div class="logout-link">
+        <a th:href="@{/logout}"><i class='bx bx-log-out icon'></i><span>Logout</span></a>
+    </div>
+</div>
+<div class="main-content">
+    <header class="main-header">
+        <h1>Browse Tournaments</h1>
+        <p>Find and join the perfect tournament for you.</p>
+    </header>
+
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+    <form th:action="@{/tournaments/browse}" method="get">
+        <div class="search-bar">
+            <input type="text" name="keyword" placeholder="Search by name or sport..." th:value="${keyword}">
+            <button type="submit"><i class='bx bx-search'></i> Search</button>
+        </div>
+    </form>
+    <main>
+        <div class="tournament-grid">
+            <div th:each="tournament : ${tournaments}" class="tournament-card">
+                <div class="card-header"><h3 th:text="${tournament.name}">Tournament Name</h3></div>
+                <div class="card-body">
+                    <p th:text="${tournament.description}">Tournament description goes here.</p>
+                    <div class="card-details">
+                        <span><i class='bx bxs-joystick icon'></i> Sport: <span th:text="${tournament.sport}">Sport</span></span>
+                        <span><i class='bx bxs-calendar icon'></i> Date: <span th:text="${#temporals.format(tournament.tournamentDate, 'dd-MMM-yyyy')}">Date</span></span>
+
+                        <span><i class='bx bxs-user-pin icon'></i> Organizer: <span th:text="${tournament.organizer.username}">Organizer Username</span></span>
+                    </div>
+                </div>
+                <div class="card-footer" sec:authorize="hasRole('PLAYER')">
+                    <a th:href="@{/tournaments/{id}/register(id=${tournament.id})}" class="register-btn">Register Now</a>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(tournaments)}" class="no-tournaments">
+                <h3>No Tournaments Found</h3>
+                <p>There are currently no tournaments matching your search. Please try again later.</p>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
